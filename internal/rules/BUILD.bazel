@@ -1,0 +1,5 @@
+load(":fn.bzl", "fn")
+
+fn(
+    name = "hello"
+)

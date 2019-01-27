@@ -1,0 +1,2 @@
+load(":toolchain.bzl", "setup_toolchains")
+setup_toolchains()
