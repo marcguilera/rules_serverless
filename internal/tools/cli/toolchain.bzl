@@ -1,23 +1,12 @@
 load(":common.bzl", "get_bin_name", "os_list")
 
-_os_to_compatibility = {
-    "linux" : [
-        "@bazel_tools//platforms:linux",
-        "@bazel_tools//platforms:x86_64",
-    ],
-    "mac" : [
-        "@bazel_tools//platforms:osx",
-        "@bazel_tools//platforms:x86_64",
-    ],
-    "windows" : [
-        "@bazel_tools//platforms:windows",
-        "@bazel_tools//platforms:x86_64",
-    ]
-}
+_toolchain_type = "toolchain_type"
 
 FnInfo = provider(
     doc = "Information about the Fn Framework CLI.",
-    fields = ["bin"]
+    fields = {
+        "bin" : "The Fn Framework binary."
+    }
 )
 
 def _fn_cli_toolchain(ctx):
@@ -39,16 +28,18 @@ def _add_toolchain(os):
     toolchain_name = "fn_cli_%s" % os
     native_toolchain_name = "fn_cli_%s_toolchain" % os
     bin_name = get_bin_name(os)
-    compatibility = _os_to_compatibility.get(os)
+    compatibility = ["@bazel_tools//platforms:%s" % os]
+
     fn_toolchain(
         name = toolchain_name,
-        bin = ":%s" % bin_name
+        bin = ":%s" % bin_name,
+        visibility = ["//visibility:public"]
     )
+
     native.toolchain(
         name = native_toolchain_name,
         toolchain = ":%s" % toolchain_name,
-        toolchain_type = ":tool_chain_type",
-        exec_compatible_with = compatibility,
+        toolchain_type = ":%s" % _toolchain_type,
         target_compatible_with = compatibility
     )
 
@@ -56,9 +47,9 @@ def setup_toolchains():
     """
     Macro te set up the toolchains for the different platforms
     """
-    native.toolchain_type(name = "toolchain_type")
+    native.toolchain_type(name = _toolchain_type)
 
-    for os in list(os_list):
+    for os in os_list:
       _add_toolchain(os)
 
 def fn_register():
@@ -66,5 +57,6 @@ def fn_register():
     Registers the Fn toolchains.
     """
     path = "//internal/tools/cli:fn_cli_%s_toolchain"
-    for os in list(os_list):
+
+    for os in os_list:
       native.register_toolchains(path % os)

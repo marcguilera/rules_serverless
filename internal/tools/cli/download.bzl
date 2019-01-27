@@ -4,7 +4,7 @@ _url = "https://github.com/fnproject/cli/releases/download/{version}/{file}"
 _os_to_file = {
     "linux" : "fn_linux",
     "mac" : "fn_mac",
-    "windows" : "fn_windows"
+    "windows" : "fn.exe",
 }
 
 def _fn_binary(os):
@@ -16,12 +16,13 @@ def _fn_binary(os):
     )
     native.http_file(
         name = name,
-        urls = [url]
+        urls = [url],
+        executable = True
     )
 
 def fn_binaries():
     """
     Installs the hermetic binary for Fn.
     """
-    for os in list(os_list):
+    for os in os_list:
         _fn_binary(os)
