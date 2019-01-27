@@ -35,18 +35,17 @@ fn_toolchain = rule(
     }
 )
 
-def _get_toolchain_name(os):
-    return "fn_cli_%s_toolchain" % os
-
 def _add_toolchain(os):
     toolchain_name = "fn_cli_%s" % os
+    native_toolchain_name = "fn_cli_%s_toolchain" % os
+    bin_name = get_bin_name(os)
+    compatibility = _os_to_compatibility.get(os)
     fn_toolchain(
         name = toolchain_name,
-        bin = ":%s" % get_bin_name(os)
+        bin = ":%s" % bin_name
     )
-    compatibility = _os_to_compatibility.get(os)
     native.toolchain(
-        name = _get_toolchain_name(os),
+        name = native_toolchain_name,
         toolchain = ":%s" % toolchain_name,
         toolchain_type = ":tool_chain_type",
         exec_compatible_with = compatibility,
@@ -66,4 +65,6 @@ def fn_register():
     """
     Registers the Fn toolchains.
     """
-    native.register_toolchains(":all")
+    path = "//internal/tools/cli:fn_cli_%s_toolchain"
+    for os in list(os_list):
+      native.register_toolchains(path % os)
