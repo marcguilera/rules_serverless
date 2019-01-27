@@ -1,5 +1,7 @@
 load(":fn.bzl", "fn")
 
+# TO TEST BUILDS
 fn(
-    name = "hello"
+    name = "hello",
+    app = "app1"
 )
